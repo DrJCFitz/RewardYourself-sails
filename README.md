@@ -1,1 +1,3 @@
-# RewardYourself-sails
+# rwys-api
+
+a [Sails](http://sailsjs.org) application

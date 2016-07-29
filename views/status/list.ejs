@@ -1,0 +1,102 @@
+<h1>Status List</h1>
+<div class="container-fluid">
+	<% var totalElements = 0; %>
+	<table class="table table-striped">
+		<tr>
+			<th>Portal</th>
+			<th>jQuery Loaded</th>
+			<th>Root Exists</th>
+			<th>Name Exists</th>
+			<th>Link Exists</th>
+			<th>Reward Exists</th>
+			<th>Name Populated</th>
+			<th>Link Populated</th>
+			<th>Reward Populated</th>
+			<th># Merchants</th>
+			<th>Last Updated</th>
+		</tr>
+		<% status.forEach(function(portal){ %>
+			<%
+				totalElements += parseInt(portal.elementCount); 
+				var createdDate = new Date(portal.dateCreated*1000);
+				var createdDateString = createdDate.getUTCFullYear() + '-' + 
+					(createdDate.getUTCMonth()+1) + '-' + 
+					createdDate.getUTCDate() + ' ' + 
+					createdDate.getUTCHours() + ':' +
+					((createdDate.getUTCMinutes()	 < 10) ? '0' : '') + createdDate.getUTCMinutes();
+			%>
+			<tr>
+				<td>
+					<% if (names[portal.portalKey]) { %>
+						<%= names[portal.portalKey] %>
+					<% } else { %>
+						<%= portal.portalKey %>
+					<% } %>
+				</td>
+				</td>
+				<td>
+					<% if (portal.jquery) { %>
+						<i class="fa fa-check success"></i>
+					<% } else { %>
+						<i class="fa fa-warning warning"></i>
+					<% } %>
+				</td>
+				<td>
+					<% if (portal.rootElementExists) { %>
+						<i class="fa fa-check success"></i>
+					<% } else { %>
+						<i class="fa fa-warning warning"></i>
+					<% } %>
+				</td>
+				<td>
+					<% if (portal.nameElementExists) { %>
+						<i class="fa fa-check success"></i>
+					<% } else { %>
+						<i class="fa fa-warning warning"></i>
+					<% } %>
+				</td>
+				<td>
+					<% if (portal.linkElementExists) { %>
+						<i class="fa fa-check success"></i>
+					<% } else { %>
+						<i class="fa fa-warning warning"></i>
+					<% } %>
+				</td>
+				<td>
+					<% if (portal.rewardElementExists) { %>
+						<i class="fa fa-check success"></i>
+					<% } else { %>
+						<i class="fa fa-warning warning"></i>
+					<% } %>
+				</td>
+				<td>
+					<% if (portal.nameElementPopulated) { %>
+						<i class="fa fa-check success"></i>
+					<% } else { %>
+						<i class="fa fa-warning warning"></i>
+					<% } %>
+				</td>
+				<td>
+					<% if (portal.linkElementPopulated) { %>
+						<i class="fa fa-check success"></i>
+					<% } else { %>
+						<i class="fa fa-warning warning"></i>
+					<% } %>
+				</td>
+				<td>
+					<% if (portal.rewardElementPopulated) { %>
+						<i class="fa fa-check success"></i>
+					<% } else { %>
+						<i class="fa fa-warning warning"></i>
+					<% } %>
+				</td>
+				<td><%=portal.elementCount%></td>
+				<td><%=createdDateString%></td>
+			</tr>
+		<% }); %>
+	</table>
+	<div>
+		Total Number of Elements:
+		<%= totalElements %>
+	</div>
+</div>
