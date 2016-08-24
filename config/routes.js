@@ -35,7 +35,32 @@ module.exports.routes = {
   'get /status/:portalType': {
     controller: 'StatusController',
     action: 'list'
-  }
+  },
+
+  'get /stores/top/:portalType': {
+    controller: 'StoresController',
+    action: 'top',
+    cors: {
+      origin: '*'
+    }
+  },
+
+  'get /stores/:portalType': {
+    controller: 'StoresController',
+    action: 'list',
+    cors: {
+      origin: '*'
+    }
+  },
+
+  'get /stores/:portalType/:storeKey': {
+    controller: 'StoresController',
+    action: 'detail',
+    cors: {
+      origin: '*'
+    }
+  },
+
 
   /***************************************************************************
   *                                                                          *

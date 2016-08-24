@@ -145,6 +145,24 @@ var retrievePortalNames = function(callback) {
 	}
 }
 
+var retrieveStoreCounts = function(portalType, callback) {
+	if (client === undefined) {
+		setTimeout(retrievePortalNames,500, portalType, callback);
+		connectToRedis();
+	} else {
+		client.hgetall('store:counts', callback);
+	}
+}
+
+var retrieveStoreNames = function(callback) {
+	if (client === undefined) {
+		setTimeout(retrievePortalNames,500, callback);
+		connectToRedis();
+	} else {
+		client.hgetall('store:names', callback);
+	}
+}
+
 connectToRedis();
 
 module.exports = {
@@ -157,5 +175,7 @@ module.exports = {
 	retrievePortalStatusKeys: retrievePortalStatusKeys,
 	retrievePortalStatus: retrievePortalStatus,
 	retrievePortalKeys: retrievePortalKeys,
+	retrieveStoreCounts: retrieveStoreCounts,
+	retrieveStoreNames: retrieveStoreNames,
 	retrieveStoreKeys: retrieveStoreKeys,
 };
