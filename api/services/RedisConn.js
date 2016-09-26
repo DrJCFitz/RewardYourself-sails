@@ -163,9 +163,60 @@ var retrieveStoreNames = function(callback) {
 	}
 }
 
+var checkTopStoreEntries = function(portalType, dateCreated, callback) {
+	if (client === undefined) {
+		setTimeout(checkTopStoreEntries,500, portalType, dateCreated, callback);
+		connectToRedis();
+	} else {
+		client.keys('topstores:'+portalType+':'+dateCreated, function(err,keyData){
+			if (err) {
+				callback(err);
+			}
+			if (null !== keyData) {
+				client.hgetall('topstores:'+portalType+':'+dateCreated, function(err, topStoreData){
+					if (err) {
+						callback(err);
+					}
+					callback(null, topStoreData);
+				});
+			} else {
+				callback(null, keyData);
+			}
+		});
+	}
+}
+
+var createTopStoreEntries = function(portalType, dateCreated, dataToWrite) {
+	if (client === undefined) {
+		setTimeout(createTopStoreEntries,500, portalType, dateCreated);
+		connectToRedis();
+	} else {
+		client.keys('topstores:'+portalType+':*', function(err,keyData){
+			if (err) {
+				console.log('error getting top store keys');
+			}
+			keyData.forEach(function(key){
+				//console.log('deleting key: '+key);
+				client.del(key, function(err, deleted){
+					console.log('delete key: '+key+':'+JSON.stringify(deleted));
+				});
+			});
+			//console.log('setting hashmap: '+'topstores:'+portalType+':'+dateCreated);
+			client.hmset('topstores:'+portalType+':'+dateCreated, dataToWrite, function(err, topStoreWrite){
+					if (err) {
+						console.log('error writing topstores');
+					}
+					console.log('writeTopStores: '+'topstores:'+portalType+':'+dateCreated+'  result: '+JSON.stringify(topStoreWrite));
+				});
+		});
+	}
+}
+
 connectToRedis();
 
 module.exports = {
+	checkTopStoreEntries: checkTopStoreEntries,
+	createTopStoreEntries: createTopStoreEntries,
 	retrieveCredentials: retrieveCredentialsByPortalID,
 	retrievePortalConfig: retrievePortalConfigByPortalID,
 	retrievePortalLink: retrievePortalLinkDataByPortalID,

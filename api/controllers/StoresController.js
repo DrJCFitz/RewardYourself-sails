@@ -33,6 +33,45 @@ var mapStoreKeys = function(portalType, callback) {
 	});
 }
 
+var listOrUpdateTopStores = function(portalType, dateCreated, callback) {
+	RedisConn.checkTopStoreEntries(portalType.toLowerCase(), dateCreated, function(err, stores){
+		if (err) {
+			callback(err);
+		}
+		//console.log('listOrUpdateTopStores stores: '+JSON.stringify(stores));
+		if (null !== stores && undefined !== stores) {
+			callback(null, stores);
+		} else {
+			//console.log('listOrUpdateTopStores query DynamoDB');
+			DynamoDBConn.queryTopStores(portalType, dateCreated, function(err,returnedStores){
+				if (err) {
+					callback(err);
+				}
+				//console.log('listOrUpdateTopStores DynamoDB returned stores: '+JSON.stringify(returnedStores));
+				if (returnedStores !== null && returnedStores.Items !== undefined) {
+					var storeKeys = [];
+					var filteredStores = {};
+					returnedStores.Items.forEach(function(element, index, array){
+						// unique entries only
+						var storeKey = element['portalStoreKey'].substring(element['portalStoreKey'].indexOf(':')+1,element['portalStoreKey'].length);
+						//console.log('listOrUpdateTopStores filtering duplicates: '+element.name+' is unique? '+JSON.stringify([storeKey, storeKeys.indexOf(storeKey)]));
+						if (storeKeys.indexOf(storeKey) === -1) {
+							storeKeys.push(storeKey);
+							filteredStores[element.name] = element.topStoreRating;
+						}
+						if (index === (array.length-1)) {
+							//console.log('listOrUpdateTopStores createTopStoreEntries: topstores'+portalType.toLowerCase()+dateCreated+' : '+JSON.stringify(filteredStores));
+							RedisConn.createTopStoreEntries(portalType.toLowerCase(), dateCreated, filteredStores);
+							callback(null, filteredStores);
+						}
+					});
+				} else {
+					callback('check connection to database');
+				}
+			});			
+		}
+	});
+}
 
 module.exports = {
 	top: function(req,res) {
@@ -49,11 +88,11 @@ module.exports = {
 					today.getUTCDate()-1 : 
 					today.getUTCDate()))) / 1000;
 
-			DynamoDBConn.queryTopStores(req.param('portalType').toLowerCase(), dayUTCLong, function(err,returnedStores){
-				if (returnedStores !== null && returnedStores.Items !== undefined) {
-					return res.json(returnedStores.Items);					
+			listOrUpdateTopStores(req.param('portalType').toLowerCase(), dayUTCLong, function(err, returnedStores){
+				if (returnedStores !== null && returnedStores !== undefined) {
+					return res.json(returnedStores);					
 				} else {
-					console.log('check connection to database');
+					console.log('something went wrong finding top stores for '+dayUTCLong);
 					return res.json([]);
 				}
 			});
